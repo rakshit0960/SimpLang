@@ -1,0 +1,4 @@
+var name: string = "World";
+var count: int = 3;
+print("Hello, " + name);
+print(count * 2);
