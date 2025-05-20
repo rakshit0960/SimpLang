@@ -65,13 +65,44 @@ public class SimPLEvaluatorVisitor extends SimPLBaseVisitor<Object> {
         Object left = visit(ctx.expression(0));
         Object right = visit(ctx.expression(1));
 
-        if (left instanceof Integer && right instanceof Integer) {
-            if (ctx.getChild(1).getText().equals("+")) {
+        if (ctx.getChild(1).getText().equals("+")) {
+            if (left instanceof String || right instanceof String) {
+                // String concatenation
+                return String.valueOf(left) + String.valueOf(right);
+            } else if (left instanceof Integer && right instanceof Integer) {
                 return (Integer)left + (Integer)right;
-            } else {
+            }
+        } else { // subtraction
+            if (left instanceof Integer && right instanceof Integer) {
                 return (Integer)left - (Integer)right;
             }
         }
         throw new RuntimeException("Invalid operands for +/-: " + left + ", " + right);
+    }
+
+    @Override
+    public Object visitMulDivExpr(SimPLParser.MulDivExprContext ctx) {
+        Object left = visit(ctx.expression(0));
+        Object right = visit(ctx.expression(1));
+
+        String operator = ctx.getChild(1).getText();
+
+        if (left instanceof Integer && right instanceof Integer) {
+            switch (operator) {
+                case "*":
+                    return (Integer)left * (Integer)right;
+                case "/":
+                    if ((Integer)right == 0) {
+                        throw new RuntimeException("Division by zero");
+                    }
+                    return (Integer)left / (Integer)right;
+                case "%":
+                    if ((Integer)right == 0) {
+                        throw new RuntimeException("Modulo by zero");
+                    }
+                    return (Integer)left % (Integer)right;
+            }
+        }
+        throw new RuntimeException("Invalid operands for " + operator + ": " + left + ", " + right);
     }
 }
